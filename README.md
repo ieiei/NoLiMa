@@ -1,6 +1,6 @@
 # NoLiMa: Long-Context Evaluation Beyond Literal Matching
 
-This repository contains the code and data associated with our paper, "[NoLiMa: Long-Context Evaluation Beyond Literal Matching](https://www.arxiv.org/abs/xxxx.xxxxx)".
+This repository contains the code and data associated with our paper, "[NoLiMa: Long-Context Evaluation Beyond Literal Matching](https://arxiv.org/abs/2502.05167)".
 
 ## Abstract
 > Recent large language models (LLMs) support long contexts ranging from 128K to 1M tokens. A popular method for evaluating these capabilities is the needle-in-a-haystack (NIAH) test, which involves retrieving a "needle" (relevant information) from a "haystack" (long irrelevant context). Extensions of this approach include increasing distractors, fact chaining, and in-context reasoning. However, in these benchmarks, models can exploit existing literal matches between the needle and haystack to simplify the task. To address this, we introduce **NoLiMa**, a benchmark extending NIAH with a carefully designed needle set, where questions and needles have **minimal lexical overlap, requiring models to infer latent associations to locate the needle within the haystack**. We evaluate 12 popular LLMs that claim to support contexts of at least 128K tokens. While they perform well in short contexts ($<$1K), performance degrades significantly as context length increases. At 32K, for instance, 10 models drop below 50\% of their strong short-length baselines. Even GPT-4o, one of the top-performing exceptions, experiences a reduction from an almost-perfect baseline of 99.3\% to 69.7\%. Our analysis suggests these declines stem from the increased difficulty the attention mechanism faces in longer contexts when literal matches are absent, making it harder to retrieve relevant information.
@@ -70,15 +70,11 @@ The needle set and haystack data will be downloaded to the `data` directory from
    - Use `llama_3.3_70b.json` in the `evaluation/model_configs` folder as a reference.
    Note that this configuaration file is used in the evaluation script (not for the vllm serve).
 
----
-
 ### 3B. API-Based Models
 
 - **Create or modify a model configuration for your API-based service**  
   - For example, use the existing config templates in the `evaluation/model_configs` folder.  
   - Note that some APIs may require additional credentials or authentication (AWS, Google Auth, etc.).
-
----
 
 ### 4. Common Steps for Both Approaches
 
@@ -99,6 +95,8 @@ The needle set and haystack data will be downloaded to the `data` directory from
 You can find various needle sets (e.g., CoT-style, multiple choice, direct, distractor-included) in `data/needlesets`.
 Adjust any paths or configurations as needed for your specific environment.
 
+---
+
 ## Haystack Filtering Pipeline
 
 To replicate our evaluation results, you can directly use the shuffled texts available in the `data/haystack/rand_shuffle` directory. If you prefer to generate your own shuffled texts or run the full processing pipeline from scratch, refer to the `data/README.md` file for more information.
@@ -106,7 +104,15 @@ To replicate our evaluation results, you can directly use the shuffled texts ava
 ## Cite
 If you use the **NoLiMa** dataset, filtering pipeline, or code from this repository, please cite the paper:
 ```bibtex
-@{}
+@misc{modarressi2025nolimalongcontextevaluationliteral,
+      title={NoLiMa: Long-Context Evaluation Beyond Literal Matching}, 
+      author={Ali Modarressi and Hanieh Deilamsalehy and Franck Dernoncourt and Trung Bui and Ryan A. Rossi and Seunghyun Yoon and Hinrich Schütze},
+      year={2025},
+      eprint={2502.05167},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2502.05167}, 
+}
 ```
 
 ## License

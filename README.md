@@ -102,7 +102,7 @@ Adjust any paths or configurations as needed for your specific environment.
 To replicate our evaluation results, you can directly use the shuffled texts available in the `data/haystack/rand_shuffle` directory. If you prefer to generate your own shuffled texts or run the full processing pipeline from scratch, refer to the `data/README.md` file for more information.
 
 ## Cite
-If you use the **NoLiMa** dataset, filtering pipeline, or code from this repository, please cite the paper:
+If you use the **NoLiMa** dataset, filtering pipeline, or code from this repository, please cite the [paper](https://arxiv.org/abs/2502.05167):
 ```bibtex
 @misc{modarressi2025nolimalongcontextevaluationliteral,
       title={NoLiMa: Long-Context Evaluation Beyond Literal Matching}, 

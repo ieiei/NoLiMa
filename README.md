@@ -15,14 +15,24 @@ This repository contains the code and data associated with our paper, "[NoLiMa: 
 | Gemini 1.5 Pro      | 2M            | 2K              | 92.6 (78.7)             | <ins>86.4</ins> | <ins>82.7</ins> | 75.4 | 63.9 | 55.5 | 48.2 |
 | Jamba 1.5 Mini      | 256K          | <1K             | 92.4 (78.6)             | 76.3 | 74.1 | 70.8 | 62.2 | 52.7 | *43.6* |
 | Command R+          | 128K          | <1K             | 90.9 (77.3)             | 77.0 | 73.5 | 66.3 | *39.5* | *21.3* | *7.4* |
+| Llama 4 Maverick 🆕 | 1M            | 2K             | 90.1 (76.6)             | <ins>81.6</ins>  | <ins>78.3</ins> | 68.8 | ⏳ | ⏳ | ⏳ |
+| Gemini Flash 2.0 🆕 | 1M            | 4K             | 89.4 (76.0)             | <ins>87.7</ins> | <ins>87.5</ins> | <ins>77.9</ins> | 64.7 | 48.2 | *41.0* |
+| Gemma 3 27B 🆕      | 128K          | <1K             | 88.6 (75.3)             | 73.3 | 65.6 | 48.1 | *32.7* | *20.2* | *9.5* |
 | Mistral Large 2     | 128K          | 2K              | 87.9 (74.7)             | <ins>86.1</ins> | <ins>85.5</ins> | 73.3 | 51.5 | *32.6* | *18.7* |
 | Claude 3.5 Sonnet   | 200K          | 4K              | 87.6 (74.4)             | <ins>85.4</ins> | <ins>84.0</ins> | <ins>77.6</ins> | 61.7 | 45.7 | *29.8* |
+| Gemma 3 12B 🆕      | 128K          | 1K              | 87.4 (74.3)             | <ins>74.7</ins> | 61.8 | *39.9* | *27.4* | *16.8* | *7.3* |
 | Gemini 1.5 Flash    | 1M            | <1K             | 84.7 (72.0)             | 68.6 | 61.6 | 51.0 | 44.4 | *35.5* | *28.6* |
 | GPT-4o mini         | 128K          | <1K             | 84.9 (72.2)             | 67.7 | 58.2 | 44.1 | *32.6* | *20.6* | *13.7* |
+| Llama 4 Scout 🆕    | 10M           | 1K              | 81.7 (69.4)             | <ins>72.3<ins> | 61.8 | 50.8 | *35.5* | *26.9* | *21.6* |
 | Llama 3.1 8B        | 128K          | 1K              | 76.7 (65.2)             | <ins>65.7</ins> | 54.4 | 44.1 | *31.9* | *22.6* | *14.2* |
+| Gemma 3 4B 🆕       | 128K          | <1K              | 73.6 (62.6)             | 50.3 | *35.3* | *16.4* | *7.5* | *2.3* | *0.9* |
 
 This table presents the performance results of selected models on NOLIMA tests. The **base score** represents a model’s accuracy on the task at short contexts (250, 500, and 1K) and serves as a controlled reference to measure performance degradation at longer contexts. 
 The **effective length** is defined as the longest context where a model maintains at least 85% of its base score. Scores above this threshold are <ins>underlined</ins>, while scores dropping below 50% of the base score are *italicized*.
+
+#### ✨ Updates:
+
+- [2025-04-10]: Added evaluation results on Gemma 3 models (4B/12B/27B), Gemini 2.0 Flash, and Llama 4 Scout. (Llama 4.0 Maverick evaluation in progress... ⏳)
 
 ### NoLiMa-Hard Results
 | Models                | Base Score | 4K  | 8K  | 16K | 32K |
@@ -68,7 +78,7 @@ The needle set and haystack data will be downloaded to the `data` directory from
 
 2. **Create or modify a local model configuration**  
    - Use `llama_3.3_70b.json` in the `evaluation/model_configs` folder as a reference.
-   Note that this configuaration file is used in the evaluation script (not for the vllm serve).
+   Note that this configuration file is used in the evaluation script (not for the vllm serve).
 
 ### 3B. API-Based Models
 

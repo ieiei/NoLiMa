@@ -118,7 +118,7 @@ If you use the **NoLiMa** dataset, filtering pipeline, or code from this reposit
 @inproceedings{modarressi2025nolima,
   title={NoLiMa: Long-Context Evaluation Beyond Literal Matching},
   author={Modarressi, Ali and Deilamsalehy, Hanieh and Dernoncourt, Franck and Bui, Trung and Rossi, Ryan A. and Yoon, Seunghyun and Schütze, Hinrich},
-  booktitle={Proceedings of the 42nd International Conference on Machine Learning (ICML)},
+  booktitle={Forty-second International Conference on Machine Learning},
   year={2025},
   url={https://arxiv.org/abs/2502.05167}
 }

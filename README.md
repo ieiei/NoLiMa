@@ -94,7 +94,8 @@ The needle set and haystack data will be downloaded to the `data` directory from
 
 2. **Run the evaluations**  
    ```bash
-   evaluation/run_tests.sh
+   cd evaluation/
+   ./run_tests.sh
    ```
 3. **Collect the results**
     - All outputs are automatically saved to the results directory specified in each run_config file.

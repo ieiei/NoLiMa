@@ -9,7 +9,8 @@ import asyncio
 from openai import AsyncAzureOpenAI, AsyncOpenAI, RateLimitError
 import tiktoken
 
-import time 
+import time
+import httpx 
 
 from functools import cache
 
@@ -26,6 +27,14 @@ from google.genai import types
 from google.genai.errors import ClientError
 
 from tenacity import retry, wait_random_exponential, stop_after_delay, retry_if_exception_type, retry_if_exception_message, wait_random
+
+DEFAULT_TOKENIZER_MAPPING = {
+    "gemini": "google",
+    "vllm": "huggingface",
+    "openai": "tiktoken",
+    "azure-openai": "tiktoken",
+    "aws": "huggingface"
+}
 
 class APIConnector:
     def __init__(
@@ -47,27 +56,38 @@ class APIConnector:
         """
         self.api_provider = api_provider
 
+        if "tokenizer_type" in kwargs:
+            self.tokenizer_type = kwargs["tokenizer_type"]
+        else:
+            if api_provider in DEFAULT_TOKENIZER_MAPPING:
+                self.tokenizer_type = DEFAULT_TOKENIZER_MAPPING[api_provider]
+            else:
+                raise ValueError(f"Invalid API provider: {api_provider}")
+            
+        self.tokenizer_model = kwargs["tokenizer_model"] if "tokenizer_model" in kwargs else model
+            
+        if self.tokenizer_type == "huggingface":
+            self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_model, use_fast=True)
+        elif self.tokenizer_type == "tiktoken":
+            self.tokenizer = tiktoken.encoding_for_model(self.tokenizer_model)
+        elif self.tokenizer_type == "google":
+            self.tokenizer = get_tokenizer_for_model(self.tokenizer_model)
+        else:
+            raise ValueError(f"Invalid tokenizer type: {self.tokenizer_type}")
+        
+        self.SYSTEM_PROMPT = kwargs.get("system_prompt", "You are a helpful assistant")
+
         if api_provider == "openai":
             self.api = AsyncOpenAI(
                 api_key=api_key,
                 base_url=api_url,
             )
-            if "o1" in model or "o3" in model:
-                self.tokenizer = tiktoken.encoding_for_model("gpt-4o")
-            else:
-                self.tokenizer = tiktoken.encoding_for_model(model)
-            self.SYSTEM_PROMPT = "You are a helpful assistant"
         elif api_provider == "azure-openai":
             self.api = AsyncAzureOpenAI(
                 api_key=api_key,
                 azure_endpoint=api_url,
                 api_version=kwargs["azure_api_version"]
             )
-            if "o1" in model or "o3" in model:
-                self.tokenizer = tiktoken.encoding_for_model("gpt-4o")
-            else:
-                self.tokenizer = tiktoken.encoding_for_model(model)
-            self.SYSTEM_PROMPT = "You are a helpful assistant"
         elif api_provider == "vllm":
             self.api = AsyncOpenAI(
                 api_key=api_key,
@@ -75,13 +95,9 @@ class APIConnector:
                 max_retries=kwargs["max_retries"],
                 timeout=kwargs["timeout"]
             )
-            self.tokenizer = AutoTokenizer.from_pretrained(model, use_fast=True)
-            self.SYSTEM_PROMPT = "You are a helpful assistant"
         elif api_provider == "gemini":
-            self.SYSTEM_PROMPT = "You are a helpful assistant"
-            self.tokenizer = get_tokenizer_for_model(model)
             self.api = genai.Client(
-                vertexai=True, project=kwargs["project_ID"], location=kwargs["location"]
+                vertexai=True, project=kwargs["project_ID"], location=kwargs["location"], http_options=types.HttpOptions(timeout=kwargs["http_timeout"] * 1000)
             )
 
             self.gemini_retry_config ={
@@ -99,16 +115,9 @@ class APIConnector:
                 region_name=kwargs["region"],
                 top_p=kwargs["top_p"],
             )
-            self.SYSTEM_PROMPT = """"""
-
-            ### NOTE: Since claude hasn't released an official tokenizer, we use a llama tokenizer instead to get an estimate of the token count
-            if "claude" in model:
-                self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct", use_fast=True)
-            else:
-                self.tokenizer = AutoTokenizer.from_pretrained(kwargs["tokenizer_name"], use_fast=True)
-                self.SYSTEM_PROMPT = "You are a helpful assistant"
 
         self.model = model
+        self.model_config = {k: v for k, v in kwargs.items()}
 
     def encode(self, text: str) -> list:
         """
@@ -120,17 +129,14 @@ class APIConnector:
         Returns:
             `dict`: Encoded text
         """
-        if self.api_provider == "openai" or self.api_provider == "azure-openai":
+        if self.tokenizer_type == "huggingface":
+            return self.tokenizer.encode(text, add_special_tokens=False)
+        elif self.tokenizer_type == "tiktoken":
             return self.tokenizer.encode(text)
-        elif self.api_provider == "vllm":
-            return self.tokenizer(text, add_special_tokens=False)["input_ids"]
-        elif self.api_provider == "gemini":
+        elif self.tokenizer_type == "google":
             return self.tokenizer._sentencepiece_adapter._tokenizer.encode(text)
-        elif self.api_provider == "aws":
-            # Check the NOTE in the __init__ method
-            return self.tokenizer(text, add_special_tokens=False)["input_ids"]
         else:
-            raise ValueError(f"Invalid API provider: {self.api_provider}")
+            raise ValueError(f"Invalid tokenizer type: {self.tokenizer_type}")
 
     def decode(self, tokens: list) -> str:
         """
@@ -142,17 +148,14 @@ class APIConnector:
         Returns:
             `str`: Decoded text
         """
-        if self.api_provider == "openai" or self.api_provider == "azure-openai":
+        if self.tokenizer_type == "huggingface":
             return self.tokenizer.decode(tokens)
-        elif self.api_provider == "vllm":
+        elif self.tokenizer_type == "tiktoken":
             return self.tokenizer.decode(tokens)
-        elif self.api_provider == "gemini":
+        elif self.tokenizer_type == "google":
             return self.tokenizer._sentencepiece_adapter._tokenizer.decode(tokens)
-        elif self.api_provider == "aws":
-            # Check the NOTE in the __init__ method
-            return self.tokenizer.decode(tokens)
         else:
-            raise ValueError(f"Invalid API provider: {self.api_provider}")
+            raise ValueError(f"Invalid tokenizer type: {self.tokenizer_type}")
 
     @cache
     def token_count(self, text: str) -> int:
@@ -166,17 +169,14 @@ class APIConnector:
         Returns:
             `int`: Token count of the text
         """
-        if self.api_provider == "openai" or self.api_provider == "azure-openai":
+        if self.tokenizer_type == "tiktoken":
             return len(self.tokenizer.encode(text))
-        elif self.api_provider == "vllm":
+        elif self.tokenizer_type == "huggingface":
             return len(self.tokenizer(text, add_special_tokens=False)["input_ids"])
-        elif self.api_provider == "gemini":
+        elif self.tokenizer_type == "google":
             return self.tokenizer.count_tokens(text).total_tokens
-        elif self.api_provider == "aws":
-            # Check the NOTE in the __init__ method
-            return len(self.tokenizer(text, add_special_tokens=False)["input_ids"])
         else:
-            raise ValueError(f"Invalid API provider: {self.api_provider}")
+            raise ValueError(f"Invalid tokenizer type: {self.tokenizer_type}")
             
     async def generate_response(
         self, 
@@ -230,12 +230,20 @@ class APIConnector:
         if self.api_provider == "openai" or self.api_provider == "vllm" or self.api_provider == "azure-openai":
             @retry(reraise=True, wait=wait_random(1, 20), retry=retry_if_exception_type(RateLimitError), stop=stop_after_delay(300))
             async def generate_content():
+                params = {
+                    "model": self.model,
+                    "messages": messages,
+                    "seed": 43
+                }
+                if self.model_config.get("openai_thinking_model", False):
+                    params["max_completion_tokens"] = max_tokens
+                else:
+                    params["max_tokens"] = max_tokens
+                    params["temperature"] = temperature
+                    params["top_p"] = top_p
+
                 completion = await self.api.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    top_p=top_p,
-                    seed=43,
-                    **({"max_completion_tokens": max_tokens} if "o1" in self.model or "o3" in self.model else {"max_tokens": max_tokens, "temperature": temperature})
+                    **params
                 )
                 return completion
             
@@ -247,14 +255,15 @@ class APIConnector:
                 "prompt_tokens": completion.usage.prompt_tokens,
                 "completion_tokens": completion.usage.completion_tokens,
                 "total_tokens": completion.usage.total_tokens,
-                "finish_reason": completion.choices[0].finish_reason
+                "finish_reason": completion.choices[0].finish_reason,
+                "cached_tokens": completion.usage.prompt_tokens_details.cached_tokens if completion.usage.prompt_tokens_details else None,
             }
             if "o1" in self.model or "o3" in self.model:
                 output["reasoning_tokens"] = completion.usage.completion_tokens_details.reasoning_tokens
             return output
 
         elif self.api_provider == "gemini":
-            @retry(reraise=True, wait=wait_random_exponential(multiplier=self.gemini_retry_config["multiplier"], max=self.gemini_retry_config["maximum"]), stop=stop_after_delay(self.gemini_retry_config["timeout"]), retry=retry_if_exception_type(ClientError))
+            @retry(reraise=True, wait=wait_random_exponential(multiplier=self.gemini_retry_config["multiplier"], max=self.gemini_retry_config["maximum"]), stop=stop_after_delay(self.gemini_retry_config["timeout"]), retry=retry_if_exception_type((ClientError, httpx.ConnectTimeout, httpx.TimeoutException)))
             async def generate_content():
                 completion = await self.api.aio.models.generate_content(
                     model=self.model,
@@ -264,21 +273,23 @@ class APIConnector:
                         temperature=temperature,
                         top_p=top_p,
                         max_output_tokens=max_tokens,
-                        seed=43,
+                        thinking_config=types.ThinkingConfig(thinking_budget=self.model_config["thinking_budget"]) if "thinking_budget" in self.model_config else None,
+                        seed=43
 
                     )
                 )
-
                 return completion
 
             completion = await generate_content()
 
             return {
-                "response": completion.text,
+                "response": completion.text if completion.text is not None else "",
                 "prompt_tokens": completion.usage_metadata.prompt_token_count,
                 "completion_tokens": completion.usage_metadata.candidates_token_count,
                 "total_tokens": completion.usage_metadata.total_token_count,
-                "finish_reason": completion.candidates[0].finish_reason
+                "finish_reason": completion.candidates[0].finish_reason,
+                "cached_tokens": completion.usage_metadata.cached_content_token_count if completion.usage_metadata.cached_content_token_count is not None else None,
+                "reasoning_tokens": completion.usage_metadata.thoughts_token_count if completion.usage_metadata.thoughts_token_count is not None else None
             }
         elif self.api_provider == "aws":
             @retry(reraise=True, wait=wait_random(5, 20), retry=retry_if_exception_message(match=r".*ThrottlingException.*"))

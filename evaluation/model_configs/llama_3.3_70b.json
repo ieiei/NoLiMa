@@ -6,6 +6,6 @@
     "max_tokens": 192,
     "temperature": 0.0,
     "top_p": 1.0,
-    "timeout": 700,
+    "timeout": 200,
     "max_retries": 3
 }

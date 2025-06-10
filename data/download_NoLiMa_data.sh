@@ -15,3 +15,9 @@ wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/r
 wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/rand_shuffle/rand_book_3.txt
 wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/rand_shuffle/rand_book_4.txt
 wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/rand_shuffle/rand_book_5.txt
+
+wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/rand_shuffle_long/rand_book_1.txt
+wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/rand_shuffle_long/rand_book_2.txt
+wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/rand_shuffle_long/rand_book_3.txt
+wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/rand_shuffle_long/rand_book_4.txt
+wget -c https://huggingface.co/datasets/amodaresi/NoLiMa/resolve/main/haystack/rand_shuffle_long/rand_book_5.txt

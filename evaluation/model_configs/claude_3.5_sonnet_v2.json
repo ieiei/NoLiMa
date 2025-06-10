@@ -8,5 +8,8 @@
     "max_retries": 3,
     "max_tokens": 192,
     "temperature": 0.0,
-    "top_p": 1.0
+    "top_p": 1.0,
+    "system_prompt": "",
+    "tokenizer_type": "huggingface",
+    "tokenizer_model": "meta-llama/Llama-3.1-8B-Instruct"
 }

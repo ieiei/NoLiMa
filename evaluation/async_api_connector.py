@@ -69,7 +69,7 @@ class APIConnector:
         if self.tokenizer_type == "huggingface":
             self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_model, use_fast=True)
         elif self.tokenizer_type == "tiktoken":
-            self.tokenizer = tiktoken.encoding_for_model(self.tokenizer_model)
+            self.tokenizer = tiktoken.get_encoding(self.tokenizer_model)
         elif self.tokenizer_type == "google":
             self.tokenizer = get_tokenizer_for_model(self.tokenizer_model)
         else:
@@ -258,7 +258,7 @@ class APIConnector:
                 "finish_reason": completion.choices[0].finish_reason,
                 "cached_tokens": completion.usage.prompt_tokens_details.cached_tokens if completion.usage.prompt_tokens_details else None,
             }
-            if "o1" in self.model or "o3" in self.model:
+            if self.model_config.get("openai_thinking_model", False):
                 output["reasoning_tokens"] = completion.usage.completion_tokens_details.reasoning_tokens
             return output
 

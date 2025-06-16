@@ -47,6 +47,7 @@ Gemini 2.5 Pro and Gemini 2.5 Flash (w/ Thinking) results are included in the No
 | **Baselines for comparison (w/o CoT)**     |           |     |     |     |     |
 | GPT-4.1              | 96.0       | 69.8 | 58.4 | 54.5 | *45.4* |
 | GPT-4o               | 99.9       | 90.7 | 75.6 | 61.1 | *38.5* |
+| Gemini 2.5 Flash (w/o Thinking) 🆕 | 87.5       | 47.2 | *23.5* | *13.4* | *9.8* |
 | **Llama 3.3 70B**     |           |     |     |     |     |
 | - w/o CoT            | 98.3       | 55.5 | *37.2* | *16.7* | *8.9* |
 | - w/ CoT             | 97.1       | 73.0 | 51.2 | *31.8* | *10.1* |

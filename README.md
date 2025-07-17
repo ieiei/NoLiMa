@@ -37,6 +37,7 @@ Longer context evaluations (64K and 128K) use a reduced number of placements (11
 
 #### ✨ Updates:
 
+- [2025-07-17]: Added evaluation results on GPT-o3 and GPT-o4 Mini on NoLiMa-Hard in the reasoning models section.
 - [2025-06-09]: Added support for external API providers (e.g. Fireworks, OpenRouter, ...) Added evaluation results on GPT-4.1 series, Gemini 2.5 Flash (w/o Thinking), and Llama 4 Maverick. 
 Gemini 2.5 Pro and Gemini 2.5 Flash (w/ Thinking) results are included in the NoLiMa-Hard section. Added evaluation results up to 128K for GPT-4o, 4.1 and Gemini 2.0 Flash.
 - [2025-04-10]: Added evaluation results on Gemma 3 models (4B/12B/27B), Gemini 2.0 Flash, and Llama 4 Scout.
@@ -52,11 +53,14 @@ Gemini 2.5 Pro and Gemini 2.5 Flash (w/ Thinking) results are included in the No
 | - w/o CoT            | 98.3       | 55.5 | *37.2* | *16.7* | *8.9* |
 | - w/ CoT             | 97.1       | 73.0 | 51.2 | *31.8* | *10.1* |
 | **Reasoning Models**  |           |     |     |     |     |
+| GPT-o3 🆕               | 100.0      | 94.4 | 86.2 | 74.9 | 58.5 |
 | Gemini 2.5 Pro 🆕    | 99.1       | 73.9 | 63.0 | 58.6 | 58.6 |
 | GPT-o1               | 99.9       | 92.0 | 78.0 | 60.1 | *31.1* |
 | DeepSeek R1-Distill-Llama-70B   | 99.9       | 91.4 | 75.5 | *49.4* | *20.7* |
 | GPT-o3 Mini          | 98.8       | 52.8 | *36.9* | *25.5* | *18.9* |
-| Gemini 2.5 Flash (w/ Thinking) 🆕  | 89.5      | 48.5 | 33.6 | 21.9 | 15.7 |
+| Gemini 2.5 Flash (w/ Thinking) 🆕  | 89.5      | 48.5 | *33.6* | *21.9* | *15.7* |
+| GPT-o4 Mini 🆕          | 99.6     | 57.4 | *30.8* | *20.2* | *11.7* |
+
 
 This table presents the performance results of selected reasoning models on **NoLiMa-Hard**, a subset of the original NoLiMa needle set containing the 10 most challenging question-needle pairs from previous evaluations. 
 Scores dropping below 50% of the base score are in *italic*.
